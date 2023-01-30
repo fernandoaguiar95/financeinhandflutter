@@ -22,43 +22,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final authController = AuthController();
   //final _loginApi = LoginApi();
 
-  _verifyEmailExists(String email) async {
-    final verifyResponse = await authController.verifiyEmailExists(email);
+  Future<bool> _verifyEmailExists(String email) async {
+    final verifyEmailResponse = await authController.verifiyEmailExists(email);
 
-    final decodeVerifyResponse = jsonDecode(verifyResponse.body);
-
-    if (decodeVerifyResponse['status']) {
-      return true;
-    } else {
-      return false;
-    }
+    return verifyEmailResponse;
   }
 
   _registerUser() async {
-    final response = await authController.registerUser(
-      _nameController.text,
-      _emailController.text,
-      _passwordController.text,
-    );
-
-    final result = jsonDecode(response.body);
-    print(result);
-
-    if (response.statusCode == 200) {
-      Navigator.pushNamed(
-        context,
-        '/transactionslist',
-      );
-    } else {
-      final responseBody = jsonDecode(response.body);
-
-      if (responseBody['errors']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('E-mail já cadastrado!'),
-          ),
+    if (!await _verifyEmailExists(_emailController.text)) {
+      try {
+        final response = await authController.registerUser(
+          _nameController.text,
+          _emailController.text,
+          _passwordController.text,
         );
+
+        if (response.statusCode == 200) {
+          if (!mounted) return;
+
+          Navigator.of(context).pushNamed('/transactionslist');
+        } else {
+          print(response.body);
+          return false;
+        }
+      } catch (e) {
+        print(e);
       }
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('E-mail já cadastrado!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
@@ -90,9 +87,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   }
                   if (!value.contains('@')) {
                     return 'Por favor insira um e-mail válido';
-                  }
-                  if (_verifyEmailExists(value)) {
-                    return 'E-mail já cadastrado!';
                   }
 
                   return null;
