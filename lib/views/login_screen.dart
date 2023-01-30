@@ -1,9 +1,10 @@
 import 'dart:convert';
 
+import 'package:financeinhand/views/register_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-class LoginApi {
+/* class LoginApi {
   final Uri _url = Uri.http('your-api.com', '/login');
 
   Future<http.Response> login(String email, String password) async {
@@ -20,7 +21,7 @@ class LoginApi {
 
     return response;
   }
-}
+} */
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -31,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _loginApi = LoginApi();
+  //final _loginApi = LoginApi();
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Form(
         key: _formKey,
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: <Widget>[
               TextFormField(
@@ -78,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    final response = await _loginApi.login(
+                    /* final response = await _loginApi.login(
                         _emailController.text, _passwordController.text);
                     if (response.statusCode == 200) {
                       print("Login realizado com sucesso!");
@@ -86,11 +87,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Aqui você pode navegar para a tela principal do aplicativo
                     } else {
                       print("Falha ao realizar login: ${response.body}");
-                    }
+                    } */
                   }
                 },
                 child: const Text('Entrar'),
-              )
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (ctx) => RegisterScreen()),
+                  );
+                },
+                child: const Text('Cadastre-se'),
+              ),
             ],
           ),
         ),
