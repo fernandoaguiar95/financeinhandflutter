@@ -1,38 +1,66 @@
 import 'dart:convert';
 
-import 'package:financeinhand/views/register_screen.dart';
+import 'package:financeinhand/controllers/auth_controller.dart';
+import 'package:financeinhand/views/transactions_list.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/src/widgets/placeholder.dart';
 
-/* class LoginApi {
-  final Uri _url = Uri.http('your-api.com', '/login');
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
-  Future<http.Response> login(String email, String password) async {
-    final Map<String, String> headers = {
-      'Accept': 'application/json',
-    };
-    final Map<String, String> body = {
-      'email': email,
-      'password': password,
-    };
-
-    final response =
-        await http.post(_url, headers: headers, body: jsonEncode(body));
-
-    return response;
-  }
-} */
-
-class LoginScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  final authController = AuthController();
   //final _loginApi = LoginApi();
+
+  _verifyEmailExists(String email) async {
+    final verifyResponse = await authController.verifiyEmailExists(email);
+
+    final decodeVerifyResponse = jsonDecode(verifyResponse.body);
+
+    if (decodeVerifyResponse['status']) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  _registerUser() async {
+    final response = await authController.registerUser(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
+    );
+
+    final result = jsonDecode(response.body);
+    print(result);
+
+    if (response.statusCode == 200) {
+      Navigator.pushNamed(
+        context,
+        '/transactionslist',
+      );
+    } else {
+      final responseBody = jsonDecode(response.body);
+
+      if (responseBody['errors']) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('E-mail já cadastrado!'),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +72,16 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: <Widget>[
               TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Nome'),
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Por favor insira um e-mail válido';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(labelText: 'Email'),
                 validator: (value) {
@@ -53,6 +91,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (!value.contains('@')) {
                     return 'Por favor insira um e-mail válido';
                   }
+                  if (_verifyEmailExists(value)) {
+                    return 'E-mail já cadastrado!';
+                  }
+
                   return null;
                 },
               ),
@@ -79,28 +121,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    /* final response = await _loginApi.login(
-                        _emailController.text, _passwordController.text);
-                    if (response.statusCode == 200) {
-                      print("Login realizado com sucesso!");
-                      print(response.body);
-                      // Aqui você pode navegar para a tela principal do aplicativo
-                    } else {
-                      print("Falha ao realizar login: ${response.body}");
-                    } */
+                    _registerUser();
                   }
                 },
                 child: const Text('Entrar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (ctx) => RegisterScreen()),
-                  );
-                },
-                child: const Text('Cadastre-se'),
-              ),
+              )
             ],
           ),
         ),

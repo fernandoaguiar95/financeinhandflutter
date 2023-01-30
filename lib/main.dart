@@ -1,3 +1,5 @@
+import 'package:financeinhand/views/register_screen.dart';
+import 'package:financeinhand/views/transactions_list.dart';
 import 'package:flutter/material.dart';
 
 import 'views/login_screen.dart';
@@ -16,7 +18,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routes: {
+        '/': (context) => LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/transactionslist': (context) => const TransactionsList(),
+      },
     );
   }
 }
