@@ -1,18 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:financeinhand/assets/constants.dart';
+import 'package:financeinhand/utils/constants.dart';
 import 'package:http/http.dart' as http;
 
 class AuthController {
-  final String _urlDefault = Constants.http_urls['URL_API']!;
-  final _headers = {
-    'Accept': 'application/json',
-  };
-
-  Future<http.Response> registerUser(
+  Future<Map<String, dynamic>> registerUser(
       String name, String email, String password) async {
-    final Uri urlRegister = Uri.parse(_urlDefault + ('/auth/register'));
+    final Uri urlRegister = Uri.parse(Constants.urlRegisterUser);
     print(urlRegister);
 
     final Map<String, String> body = {
@@ -21,18 +16,30 @@ class AuthController {
       'password': password
     };
 
-    final response = await http.post(
-      urlRegister,
-      headers: _headers,
-      body: body,
-    );
+    if (!await verifiyEmailExists(email)) {
+      final response = await http.post(
+        urlRegister,
+        headers: Constants.headersApi,
+        body: body,
+      );
 
-    print(response);
-    return response;
+      final bodyReponse = jsonDecode(response.body);
+
+      print(response);
+      return {
+        'status': true,
+        'message': bodyReponse['message'],
+      };
+    } else {
+      return {
+        'status': false,
+        'message': 'Usuário já cadastrado!',
+      };
+    }
   }
 
   Future<bool> verifiyEmailExists(String email) async {
-    final Uri urlVerifyEmail = Uri.parse(_urlDefault + ('/auth/verifyemail'));
+    final Uri urlVerifyEmail = Uri.parse(Constants.urlVerifyEmailExists);
     print(urlVerifyEmail);
 
     final Map<String, String> body = {
@@ -42,7 +49,7 @@ class AuthController {
     try {
       final response = await http.post(
         urlVerifyEmail,
-        headers: _headers,
+        headers: Constants.headersApi,
         body: body,
       );
 

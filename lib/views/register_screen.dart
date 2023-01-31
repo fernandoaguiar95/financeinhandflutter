@@ -20,42 +20,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
 
   final authController = AuthController();
-  //final _loginApi = LoginApi();
-
-  Future<bool> _verifyEmailExists(String email) async {
-    final verifyEmailResponse = await authController.verifiyEmailExists(email);
-
-    return verifyEmailResponse;
-  }
 
   _registerUser() async {
-    if (!await _verifyEmailExists(_emailController.text)) {
-      try {
-        final response = await authController.registerUser(
-          _nameController.text,
-          _emailController.text,
-          _passwordController.text,
-        );
+    final response = await authController.registerUser(
+      _nameController.text,
+      _emailController.text,
+      _passwordController.text,
+    );
 
-        if (response.statusCode == 200) {
-          if (!mounted) return;
-
-          Navigator.of(context).pushNamed('/transactionslist');
-        } else {
-          print(response.body);
-          return false;
-        }
-      } catch (e) {
-        print(e);
-      }
+    if (response['status']) {
+      print('Usuário cadastrado com sucesso');
     } else {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('E-mail já cadastrado!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      print(response['message']);
     }
   }
 
