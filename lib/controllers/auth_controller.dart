@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:financeinhand/models/response_model.dart';
 import 'package:financeinhand/utils/constants.dart';
 import 'package:http/http.dart' as http;
 
 class AuthController {
-  Future<Map<String, dynamic>> registerUser(
+  Future<Response> registerUser(
       String name, String email, String password) async {
     final Uri urlRegister = Uri.parse(Constants.urlRegisterUser);
     print(urlRegister);
@@ -25,16 +26,19 @@ class AuthController {
 
       final bodyReponse = jsonDecode(response.body);
 
+      final Response result = Response.fromJson(bodyReponse);
+
+      print(result);
+
       print(response);
-      return {
-        'status': true,
-        'message': bodyReponse['message'],
-      };
+      return result;
     } else {
-      return {
-        'status': false,
-        'message': 'Usuário já cadastrado!',
-      };
+      final Response verifyEmailResponse = Response(
+        status: false,
+        message: 'Usuário já cadastrado!',
+      );
+
+      return verifyEmailResponse;
     }
   }
 

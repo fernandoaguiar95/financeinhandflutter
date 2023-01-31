@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:financeinhand/controllers/auth_controller.dart';
+import 'package:financeinhand/requesters/requester_user.dart';
 import 'package:financeinhand/views/transactions_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -20,20 +21,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
 
   final authController = AuthController();
-
-  _registerUser() async {
-    final response = await authController.registerUser(
-      _nameController.text,
-      _emailController.text,
-      _passwordController.text,
-    );
-
-    if (response['status']) {
-      print('Usuário cadastrado com sucesso');
-    } else {
-      print(response['message']);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +78,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    _registerUser();
+                    //_registerUser();
+                    RequesterUser().registerUser(
+                      context,
+                      _nameController.text,
+                      _emailController.text,
+                      _passwordController.text,
+                    );
                   }
                 },
                 child: const Text('Entrar'),
